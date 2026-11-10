@@ -1,0 +1,33 @@
+export function adminThemeValue(value){return value==='light'?'light':'dark';}
+export function AdminThemeToggle({react}){
+ const R=react,h=R.createElement,[theme,setTheme]=R.useState(()=>{try{return adminThemeValue(localStorage.getItem('studio-admin-theme'))}catch{return'dark'}});
+ R.useEffect(()=>{document.documentElement.dataset.adminTheme=theme;try{localStorage.setItem('studio-admin-theme',theme)}catch{}return()=>{delete document.documentElement.dataset.adminTheme};},[theme]);
+ return h('button',{type:'button',className:'text-btn admin-theme-toggle','aria-label':theme==='dark'?'Usar tema claro no painel':'Usar tema dark no painel','aria-pressed':theme==='dark',onClick:()=>setTheme(t=>t==='dark'?'light':'dark')},h('svg',{width:16,height:16,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.5,'aria-hidden':true},theme==='dark'?h('g',null,h('circle',{cx:12,cy:12,r:4}),h('path',{d:'M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5'})):h('path',{d:'M20 14a8 8 0 0 1-10-10 8.5 8.5 0 1 0 10 10Z'})),theme==='dark'?'Tema claro':'Tema dark');
+}
+export function FireworkBurst({react,delay=0}){
+ const h=react.createElement;
+ return h('svg',{className:'firework-burst',viewBox:'0 0 200 220',fill:'none',stroke:'currentColor',strokeWidth:1.1,style:{'--burst-delay':delay+'s'},'aria-hidden':true},
+ h('path',{className:'firework-launch',d:'M100 210v-65',strokeWidth:1.4}),
+ h('g',{className:'firework-rays'},...Array.from({length:12},(_,i)=>{const angle=i*Math.PI/6;return h('path',{key:i,d:`M${100+Math.cos(angle)*16} ${96+Math.sin(angle)*16}L${100+Math.cos(angle)*69} ${96+Math.sin(angle)*69}`})})),
+ h('circle',{className:'firework-ring',cx:100,cy:96,r:46}),
+ ...Array.from({length:12},(_,i)=>{const a=i*Math.PI/6+.14,r=72+(i%3)*7;return h('circle',{key:i,className:'firework-spark',cx:100,cy:96,r:i%3===0?2:1.35,fill:'currentColor',stroke:'none',style:{'--spark-x':(Math.cos(a)*r).toFixed(2)+'px','--spark-y':(Math.sin(a)*r+8).toFixed(2)+'px'}})}));
+}
+export function ImmersiveHero({settings,products,go,react,Image,Decor}){
+ const R=react,h=R.createElement,scene=R.useRef(null),frame=R.useRef(0),[motion,setMotion]=R.useState(true),[onScreen,setOnScreen]=R.useState(true),[hidden,setHidden]=R.useState(false);
+ const published=products.filter(p=>p.status==='published').slice(0,4);
+ const items=published.flatMap(p=>[{...p,preview:p.cover},...(p.images||[]).filter(im=>im.url!==p.cover).slice(0,published.length<3?2:0).map(im=>({...p,preview:im.url}))]).slice(0,5);
+ R.useEffect(()=>{const media=window.matchMedia('(prefers-reduced-motion: reduce)'),visibility=()=>setHidden(document.hidden);visibility();document.addEventListener('visibilitychange',visibility);let observer;if(window.IntersectionObserver&&scene.current){observer=new IntersectionObserver(([entry])=>setOnScreen(entry.isIntersecting),{threshold:0});observer.observe(scene.current)}
+ return()=>{document.removeEventListener('visibilitychange',visibility);observer?.disconnect();cancelAnimationFrame(frame.current)};},[]);
+ const shift=e=>{if(!motion||window.matchMedia('(prefers-reduced-motion: reduce)').matches||e.pointerType==='touch'||!window.matchMedia('(hover: hover) and (pointer: fine)').matches)return;const el=scene.current;if(!el)return;const box=el.getBoundingClientRect(),x=(e.clientX-box.left)/box.width-.5,y=(e.clientY-box.top)/box.height-.5;cancelAnimationFrame(frame.current);frame.current=requestAnimationFrame(()=>{el.style.setProperty('--look-x',(x*5).toFixed(2)+'deg');el.style.setProperty('--look-y',(-y*4).toFixed(2)+'deg')})};
+ const reset=()=>{cancelAnimationFrame(frame.current);scene.current?.style.setProperty('--look-x','0deg');scene.current?.style.setProperty('--look-y','0deg')};
+ return h('section',{className:'immersive-hero '+(!motion||!onScreen||hidden?'scene-paused':''),ref:scene,onPointerMove:shift,onPointerLeave:reset,'aria-label':settings.name},
+ h('div',{className:'immersive-atmosphere','aria-hidden':true},h('span',{className:'room-horizon'}),h('span',{className:'room-light light-one'}),h('span',{className:'room-light light-two'}),h('span',{className:'room-plinth'})),
+ Decor&&h(Decor,{settings,react}),
+ h('div',{className:'immersive-intro'},h('div',{className:'intro-rule','aria-hidden':true}),h('h1',{'aria-label':settings.name},settings.name==='Lucas de Oliveira Gomes'?h(R.Fragment,null,h('span',null,'Lucas de'),h('span',null,'Oliveira Gomes')):settings.name),h('p',null,settings.subtitle),h('a',{href:'#templates',className:'immersive-explore',onClick:e=>{e.preventDefault();document.getElementById('templates')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'})}},'Templates',h('svg',{width:19,height:19,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.5,'aria-hidden':true},h('path',{d:'M5 12h14m-5-5 5 5-5 5'})))),
+ h('div',{className:'spatial-stage'},h('div',{className:'spatial-window'},
+ h('div',{className:'spatial-toolbar'},h('div',{className:'window-lights','aria-hidden':true},h('i'),h('i'),h('i')),h('span',null,'Templates'),h('span',{className:'window-counter'},String(items.length).padStart(2,'0')+' prévias')),
+ h('div',{className:'spatial-board','data-cards':items.length},items.length?items.map((p,i)=>h('a',{key:p.id+'-'+i,className:'spatial-product spatial-product-'+i,href:'/templates/'+p.slug,onClick:e=>{e.preventDefault();go('/templates/'+p.slug)},'aria-label':'Ver '+p.name},h('div',{className:'spatial-art'},h(Image,{src:p.preview.startsWith('/images/')?p.preview.replace('.webp','-thumb.webp'):p.preview,alt:p.name,loading:i<2?'eager':'lazy',decoding:'async'})),h('div',{className:'spatial-caption'},h('span',null,p.name),h('svg',{width:16,height:16,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.4,'aria-hidden':true},h('path',{d:'M6 18 18 6M6 6h12v12'}))))):h('div',{className:'spatial-loading',role:'status'},'Carregando templates…')),
+ h('div',{className:'spatial-bottom'},h('span',{className:'spatial-status','aria-hidden':true}),h('span',null,settings.subtitle),h('span',{className:'spatial-mark','aria-hidden':true},'↗'))),
+ h('div',{className:'spatial-orbit orbit-one','aria-hidden':true}),h('div',{className:'spatial-orbit orbit-two','aria-hidden':true}),
+ h('button',{type:'button',className:'spatial-motion','aria-pressed':!motion,onClick:()=>{setMotion(v=>!v);reset()}},h('svg',{width:14,height:14,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.5,'aria-hidden':true},h('path',{d:motion?'M8 5v14M16 5v14':'m8 5 11 7-11 7V5Z'})),motion?'Pausar efeitos':'Ativar efeitos')));
+}
