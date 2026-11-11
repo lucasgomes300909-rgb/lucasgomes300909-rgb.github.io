@@ -1,0 +1,30 @@
+.is-storefront .signature-dot,.is-storefront .catalog-mark { display:none }
+html[data-studio-theme] .is-storefront .catalog {
+  border:0; border-radius:0; background:transparent; box-shadow:none;
+}
+.is-storefront .product-card,.is-storefront .product-card:hover {
+  padding:0; border:0; background:transparent; transform:none;
+}
+.is-storefront .product-caption { padding-inline:0 }
+.is-storefront .banner-stage { border-radius:10px }
+.is-storefront .template-help {
+  display:grid; grid-template-columns:minmax(230px,1fr) minmax(0,2.2fr);
+  gap:32px clamp(32px,5vw,84px); align-items:start;
+  border-top:1px solid var(--scene-line); padding-top:48px;
+}
+.template-help .help-intro { display:block; margin:0 }
+.template-help .help-intro h2 { font:400 clamp(38px,4vw,58px)/1.1 'Instrument Serif',Georgia,serif; letter-spacing:-.02em }
+.help-intro p { font:400 15px/1.75 Manrope,sans-serif; color:var(--scene-muted); max-width:38ch; margin:20px 0 0 }
+.template-help .help-guide { padding:0; border:0; border-radius:0; background:transparent; min-width:0 }
+.template-help .help-guide-image { border-radius:5px }
+.template-help .help-guide figcaption { padding-inline:0; font-size:12px }
+.template-help .help-bottom { grid-column:2; display:block; margin:0 }
+.template-help .help-questions summary { font-size:14px }
+.template-help .help-text-steps li,.template-help .help-text-steps p,.template-help .help-questions details>p { font-size:13px }
+.template-help .help-contact { padding-top:16px; max-width:none }
+.template-help .help-contact a { font-size:13px }
+@media(max-width:760px) {
+  .is-storefront .template-help { grid-template-columns:minmax(0,1fr); padding-top:30px; gap:24px }
+  .template-help .help-bottom { grid-column:1 }
+  .help-intro p { max-width:none }
+}
